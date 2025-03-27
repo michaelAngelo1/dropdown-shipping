@@ -64,8 +64,32 @@ function runBoth() {
 // }
 
 const shippingZones = {
-  1: ["Singapore", "Malaysia", "Brunei", "Hong Kong", "Macau", "Philippines"],
-  2: ["Thailand", "Taiwan"],
+  1: [
+    "Singapore (SG)",
+    "Timor-Leste (TL)",
+    "Macau SAR China (MO)",
+    "Malaysia (MY)",
+    "Myanmar (MM)",
+    "Brunei (BN)",
+    "Cambodia (KH)",
+    "Hong Kong SAR China (HK)",
+    "Laos (LA)",
+    "PhilippinesThe (PH)",
+    "Thailand (TH)",
+    "Vietnam (VN)",
+    "China (CN)",
+    "Guangzhou (CAN)",
+    "Dongguan (DGM)",
+    "Fuzhou (FOC)",
+    "South China Area (HAK)",
+    "Chaoshan & Huizhou (SWA)",
+    "Shenzhen (SZX)",
+    "Fujian Province (XMN)",
+    "Zhujiang Delta Area (ZUH)",
+    "Henan Province (CGO)",
+    "Japan (JP)"
+  ],
+  2: ["Thailand (TH)", "Taiwan (TW)"],
   3: ["Japan", "South Korea"],
   4: ["Australia", "New Zealand"],
   5: ["USA", "Canada"],
@@ -75,17 +99,17 @@ const shippingZones = {
 };
 
 const lionParcelCountries = {
-  "$5 USD": ["Singapore", "Macau", "Malaysia"],
-  "$15 USD": ["Brunei", "Hong Kong", "Philippines"],
-  "$20 USD": ["Thailand"],
-  "$10 USD": ["Taiwan"],
+  "$5 USD": ["Singapore (SG)", "Macau SAR China (MO)", "Malaysia (MY)"],
+  "$15 USD": ["Brunei (BN)", "Hong Kong SAR China (HK)", "Philippines (PH)"],
+  "$20 USD": ["Thailand (TH)"],
+  "$10 USD": ["Taiwan (TW)"],
 };
 
 function getShippingProviders(country) {
   let providers = [];
 
-  if (country === "Singapore") {
-    providers.push({ provider: "J&T Singapore", fee: "$5 USD", duration: "3 - 7 days" });
+  if (country === "Singapore (SG)") {
+    providers.push({ provider: "J&T Singapore", fee: "$5 USD", duration: "3 - 7 Business Days" });
   }
 
   for (const [zone, countries] of Object.entries(shippingZones)) {
@@ -94,20 +118,50 @@ function getShippingProviders(country) {
       if (zone == 4) fee = "$30 USD";
       if (zone >= 5 && zone <= 7) fee = "$35 USD";
       if (zone == 8) fee = "$50 USD";
-      providers.push({ provider: `DHL`, fee, duration: "1 - 3 days" });
+      providers.push({ provider: "DHL", fee, duration: "1 - 3 Business Days" });
     }
   }
 
   for (const [fee, countries] of Object.entries(lionParcelCountries)) {
+    console.log("lion parcel countries :)");
     if (countries.includes(country)) {
-      providers.push({ provider: "Lion Parcel", fee, duration: "3 - 7 days" });
+      console.log("masuk if countries", country);
+      let duration = "";
+      if(country == "Brunei (BN)") {
+        duration = "6 - 8 Business Days";
+      }
+      if(country == "Hong Kong SAR China (HK)") {
+        duration = "6 - 7 Business Days";
+      }
+      if(country == "Macau SAR China (MO)") {
+        duration = "6 - 8 Business Days";
+      }
+      if(country == "Malaysia (MY)") {
+        duration = "5 - 7 Business Days";
+      }
+      if(country == "Philippines (PH)") {
+        duration = "7 - 11 Business Days";
+      }
+      if(country == "Taiwan (TW)") {
+        duration = "5 - 7 Business Days";
+      }
+      if(country == "Thailand (TH)") {
+        duration = "9 - 12 Business Days";
+      }
+      if(country == "Singapore (SG)") {
+        duration = "2 - 3 Business Days";
+      }
+      providers.push({ provider: "Lion Parcel", fee, duration: duration });
     }
   }
 
-  return providers;
+  return providers.sort((a, b) => parseFloat(a.fee.replace("$", "")) - parseFloat(b.fee.replace("$", "")));
 }
 
 function drawTable(country) {
+  
+  console.log("country on drawtable: ", country);
+  
   const shipFee = document.getElementById("ship-fee");
   shipFee.innerHTML = ""; // Clear previous content
 
@@ -117,6 +171,15 @@ function drawTable(country) {
     return;
   }
 
+  // Header Text
+  let headerMsg = `Shipping Available to ${country}`;
+  const headerText = document.createElement("div");
+  headerText.innerText = headerMsg;
+  headerText.style.color = "black";
+  headerText.style.fontWeight = "600";
+  headerText.style.marginBottom = "1rem";
+  shipFee.appendChild(headerText);
+
   const shipTable = document.createElement("table");
   shipTable.style.width = "100%";
   shipTable.style.borderCollapse = "collapse";
@@ -125,7 +188,7 @@ function drawTable(country) {
   ["Provider", "Fee", "Duration"].forEach((headerText) => {
     const header = document.createElement("th");
     header.textContent = headerText;
-    header.style.border = "1px solid black";
+    header.style.border = "1px solid gray";
     header.style.padding = "8px";
     header.style.backgroundColor = "gray";
     header.style.color = "white";
@@ -138,8 +201,7 @@ function drawTable(country) {
     [provider, fee, duration].forEach((text) => {
       const cell = document.createElement("td");
       cell.textContent = text;
-      cell.style.border = "1px solid black";
-      cell.style.borderRadius = "12px";
+      cell.style.border = "1px solid gray";
       cell.style.padding = "8px";
       cell.style.textAlign = "center";
       row.appendChild(cell);
@@ -165,7 +227,9 @@ function filterFunction() {
       option.onclick = function (event) {
         event.preventDefault();
         input.value = txtValue;
-        drawTable(txtValue.replace(/ \(.*\)/, "")); // Remove country code from selection
+        console.log("country: ", txtValue);
+        // drawTable(txtValue.replace(/ \(.*\)/, ""));
+        drawTable(txtValue);
         dropdownCountries.style.display = "none";
       };
     } else {
